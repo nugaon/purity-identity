@@ -7,7 +7,7 @@ export type IdentityType = {
   address: string
 }
 
-/// @dev Used for Premium Content's encryption/decryption
+/// @dev Used for Premium Content's encryption/decryption and contract store
 export class IdenityService {
 
   private identity: IdentityType;
