@@ -7,7 +7,7 @@ export type IdentityType = {
   address: string
 }
 
-export type serializedPublicKey = {
+export type SerializedPublicKey = {
   pubKeyPrefix: boolean,
   pubKey: Array<number>
 }

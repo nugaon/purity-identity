@@ -1,6 +1,6 @@
 {
   "name": "purity-identity",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Key generation for the Purity users, tool to encrypt/decrypt messages with their identities and helpers for compressing decompressing public keys",
   "main": "index.js",
   "scripts": {
