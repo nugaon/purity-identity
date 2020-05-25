@@ -1,7 +1,7 @@
 {
   "name": "purity-identity",
   "version": "0.0.1",
-  "description": "Key generation for the Purity users, tool to encrypt/decrypt messages with their identities and helpers for compress decompress public keys",
+  "description": "Key generation for the Purity users, tool to encrypt/decrypt messages with their identities and helpers for compressing decompressing public keys",
   "main": "index.js",
   "scripts": {
     "build": "tsc",
