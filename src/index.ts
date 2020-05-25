@@ -7,7 +7,14 @@ export type IdentityType = {
   address: string
 }
 
-/// @dev Used for Premium Content's encryption/decryption and contract store
+export type serializedPublicKey = {
+  pubKeyPrefix: boolean,
+  pubKey: Array<number>
+}
+
+/**
+ * Used for Premium Content's encryption/decryption and contract store for pubkeys
+**/
 export class IdenityService {
 
   private identity: IdentityType;
@@ -38,6 +45,12 @@ export class IdenityService {
   public getDecompressedPublicKey(): string {
     return this.identity.publicKey;
   }
+
+  public getSerializedPublicKey(): serializedPublicKey {
+    return serializePublicKey(
+      this.identity.publicKey
+    )
+  }
 }
 
 // PUBLIC FUNCTIONS
@@ -61,11 +74,45 @@ export function compressPublicKey(pubKey: string): string {
   return EthCrypto.publicKey.compress(pubKey);
 }
 
-/// @dev Gives back the user's compressed public key first two characters in a boolean,
-/// because it only can be "02" or "03"
-/// returns true if "03"
-export function compressPublicKeyPrefix(pubKey: string): boolean {
-  const firstTwoChars: string = pubKey.substr(0, 2)
+/**
+ * For contract store, the public key has to be serialized and compressed
+ * as much as possible
+**/
+export function serializePublicKey(
+  pubKey: string
+): serializedPublicKey {
+  const compressedPubKey = compressPublicKey(pubKey)
+  const userPubKeyPart1: boolean = serializeCompressedPublicKeyPrefix(
+    compressedPubKey
+  );
+  const userPubKeyPart2: Array<number> = serializeCompressedPublicKey(
+    compressedPubKey
+  )
+  return {
+    pubKeyPrefix: userPubKeyPart1,
+    pubKey: userPubKeyPart2
+  }
+}
+
+/**
+ * Get decompressed public key string from contract store
+**/
+export function unserializePublicKey(
+  pubKeyPrefix: boolean,
+  pubKey: string
+): string {
+  return EthCrypto.publicKey.decompress(
+    decompressPublicKeyPrefix(pubKeyPrefix) + pubKey.substr(2, pubKey.length)
+  )
+}
+
+/**
+ * Gives back the compressed public key's first two characters in a boolean,
+ * because it only can be "02" or "03"
+ * returns true if "03"
+**/
+function serializeCompressedPublicKeyPrefix(compressedPubKey: string): boolean {
+  const firstTwoChars: string = compressedPubKey.substr(0, 2)
   if(firstTwoChars === "03") {
     return true
   }
@@ -73,31 +120,23 @@ export function compressPublicKeyPrefix(pubKey: string): boolean {
     return false
   }
   // else
-  throw new Error(`The first two characters of the ${pubKey}`
+  throw new Error(`The first two characters of the ${compressedPubKey}`
     + ` compressed public key are not 02 or 03`)
 }
 
-export function decompressPublicKeyPrefix(prefix: boolean): string {
+/**
+ * Serializes the public key's bigger part (without prefix)
+**/
+function serializeCompressedPublicKey(
+  compressedPubKey: string
+): Array<number> {
+  let userPubKeyPart2: string = compressedPubKey.substr(
+    2,
+    compressedPubKey.length
+  );
+  return hexToBytes("0x" + userPubKeyPart2);
+}
+
+function decompressPublicKeyPrefix(prefix: boolean): string {
   return prefix ? "03" : "02";
-}
-
-/// @dev at "subscribe" action the user can upload his key.
-export function serializePublicKey(
-  pubKey: string
-): { pubKeyPrefix: boolean, pubKey: Array<number> } {
-  let userPubKeyPart1: boolean = compressPublicKeyPrefix(pubKey);
-  let userPubKeyPart2: string = pubKey.substr(2, pubKey.length);
-  const userPubKey2 = hexToBytes("0x" + userPubKeyPart2);
-  return {
-    pubKeyPrefix: userPubKeyPart1,
-    pubKey: userPubKey2
-  }
-}
-
-/// @dev get compressed public key string from contract store
-export function unserializePublicKey(
-  pubKeyPrefix: boolean,
-  pubKey: string
-): string {
-  return decompressPublicKeyPrefix(pubKeyPrefix) + pubKey.substr(2, pubKey.length);
 }
