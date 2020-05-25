@@ -46,7 +46,7 @@ export class IdenityService {
     return this.identity.publicKey;
   }
 
-  public getSerializedPublicKey(): serializedPublicKey {
+  public getSerializedPublicKey(): SerializedPublicKey {
     return serializePublicKey(
       this.identity.publicKey
     )
@@ -80,7 +80,7 @@ export function compressPublicKey(pubKey: string): string {
 **/
 export function serializePublicKey(
   pubKey: string
-): serializedPublicKey {
+): SerializedPublicKey {
   const compressedPubKey = compressPublicKey(pubKey)
   const userPubKeyPart1: boolean = serializeCompressedPublicKeyPrefix(
     compressedPubKey
